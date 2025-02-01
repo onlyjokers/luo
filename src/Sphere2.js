@@ -12,7 +12,10 @@ const SphereMaterial = shaderMaterial(
     wireframeWidth: 0.04,       // 线框宽度
     noiseScale: 4.0,           // 噪声缩放比例
     noiseStrength: 0.02,       // 噪声强度
-    horizontalOffset: 1.0      // 水平偏移量
+    horizontalOffset: 1.0,      // 水平偏移量
+    mousePos: new THREE.Vector3(0, 0, 0), // 新增
+    hover: 0,                              // 新增
+    animationStrength: 1.0,  // 新增：控制原有动画的强度
   },
   // 顶点着色器 - 处理几何体顶点位置计算
   `
@@ -22,6 +25,9 @@ const SphereMaterial = shaderMaterial(
     uniform float noiseScale;
     uniform float noiseStrength;
     uniform float horizontalOffset;
+    uniform vec3 mousePos;
+    uniform float hover;
+    uniform float animationStrength;  // 新增
 
     // Simplex noise function
     vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -73,8 +79,8 @@ const SphereMaterial = shaderMaterial(
         vec2 noiseCoord = vec2(cos(angle), sin(angle)) * polarCoord.y;
         
         // Sample noise at multiple overlapping points for seamless wrapping
-        float verticalNoise = snoise(noiseCoord * noiseScale + time * 0.2) * noiseStrength;
-        float horizontalNoise = snoise((noiseCoord + vec2(0.5)) * noiseScale + time * 0.15) * horizontalOffset;
+        float verticalNoise = snoise(noiseCoord * noiseScale + time * 0.2) * noiseStrength * animationStrength;
+        float horizontalNoise = snoise((noiseCoord + vec2(0.5)) * noiseScale + time * 0.15) * horizontalOffset * animationStrength;
         
         // Calculate tangent vector
         vec3 tangent = normalize(cross(normal, vec3(0.0, 1.0, 0.0)));
@@ -88,7 +94,16 @@ const SphereMaterial = shaderMaterial(
         vec3 newPosition = position + 
                           normal * verticalNoise +
                           tangent * horizontalNoise;
+
+        // 计算鼠标位置与当前顶点的位置差异
+        float dist = distance(position, mousePos);
         
+        // 产生随时间波动的波纹效果，并根据 hover 决定影响强度
+        float ripple = 0.03 * sin(dist * 10.0 - time * 3.0) * hover;
+
+        // 将波纹影响叠加到 newPosition 上
+        newPosition += normal * ripple;
+
         gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
     }
   `,
@@ -127,7 +142,8 @@ export default function Sphere() {
   // 添加过渡状态
   const transitionRef = useRef({ 
     hover: 0,
-    wave: 0
+    wave: 0,
+    rotSpeed: 0.0017 // 新增：初始旋转速度
   });
 
   // 每帧更新函数
@@ -142,8 +158,15 @@ export default function Sphere() {
         ),
         0.1
       );
-
-      meshRef.current.rotation.y += 0.0017;
+      
+      // 新增：平滑控制旋转速度，当悬停时趋向 0，不悬停时为 0.0017
+      const targetRotSpeed = isHovered ? 0 : 0.0017;
+      transitionRef.current.rotSpeed = THREE.MathUtils.lerp(
+        transitionRef.current.rotSpeed || 0.0017,
+        targetRotSpeed,
+        0.05
+      );
+      meshRef.current.rotation.y += transitionRef.current.rotSpeed;
     }
 
     if (materialRef.current) {
@@ -157,8 +180,15 @@ export default function Sphere() {
         0.05  // 调整这个值可以改变过渡速度
       );
 
+      // 平滑过渡动画强度
+      materialRef.current.animationStrength = THREE.MathUtils.lerp(
+        materialRef.current.animationStrength || 1.0,
+        isHovered ? 0.0 : 1.0,
+        0.02  // 调整这个值可以改变动画停止的速度
+      );
+
       // 基础正弦波动
-      let offset = Math.sin(state.clock.elapsedTime) * 0.07;
+      let offset = Math.sin(state.clock.elapsedTime) * 0.07 * (1 - transitionRef.current.hover);
       
       // 平滑过渡的方波效果
       const squareWave = Math.sign(Math.sin(state.clock.elapsedTime * 2)) * 0.03;
@@ -175,17 +205,24 @@ export default function Sphere() {
       
       // 更新水平偏移量
       materialRef.current.horizontalOffset = offset;
+
+      // 将 hover 值传递给着色器
+      materialRef.current.hover = transitionRef.current.hover;
     }
   });
 
   // 处理指针（鼠标）移动事件
   const handlePointerMove = (event) => {
-    if (isHovered) {
-      // 将鼠标位置转换为标准化设备坐标（-1 到 +1）
-      const x = (event.point.x / (window.innerWidth / 2));
-      const y = (event.point.y / (window.innerHeight / 2));
-      setMousePosition({ x, y });
-    }
+    if (!materialRef.current || !meshRef.current) return;
+
+    // 将鼠标在世界坐标下的点转换到当前 mesh（球体）的本地坐标
+    const localPos = meshRef.current.worldToLocal(event.point.clone());
+    materialRef.current.mousePos.set(localPos.x, localPos.y, localPos.z);
+
+    // 保留对鼠标位置的记录，若需要计算其他效果可使用
+    const x = (event.point.x / (window.innerWidth / 2));
+    const y = (event.point.y / (window.innerHeight / 2));
+    setMousePosition({ x, y });
   };
 
   // 渲染3D球体
