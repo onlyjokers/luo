@@ -211,7 +211,7 @@ export default function Sphere() {
     }
   });
 
-  // 处理指针（鼠标）移动事件
+  // 鼠标移动相关：开始处理鼠标移动，更新着色器中鼠标位置
   const handlePointerMove = (event) => {
     if (!materialRef.current || !meshRef.current) return;
 
@@ -224,6 +224,7 @@ export default function Sphere() {
     const y = (event.point.y / (window.innerHeight / 2));
     setMousePosition({ x, y });
   };
+  // 鼠标移动相关：结束处理鼠标移动，更新着色器中鼠标位置
 
   // 渲染3D球体
   return (

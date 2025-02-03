@@ -40,6 +40,7 @@ export default function App() {
   // 新增：存储相机偏移，以在 SteadicamRig 中使用
   const offsetRef = useRef(new THREE.Vector3(0, 0, 0));
 
+  // 鼠标移动相关：开始处理Canvas鼠标移动事件，更新控制器和相机偏移
   // 处理鼠标移动事件的函数
   const handleMouseMove = (e) => {
     if (controlsRef.current) {
@@ -60,6 +61,7 @@ export default function App() {
     offsetRef.current.y = -(e.clientY / window.innerHeight - 0.5) * 5.0;
     offsetRef.current.z = 0.4 * Math.sin(e.clientX * 0.02);
   };
+  // 鼠标移动相关：结束处理Canvas鼠标移动事件，更新控制器和相机偏移
 
   return (
     // Canvas是Three.js的渲染容器
