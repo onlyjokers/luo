@@ -137,7 +137,6 @@ export default function Sphere() {
   const materialRef = useRef();        // 材质引用
   const meshRef = useRef();            // 网格引用
   const [isHovered, setIsHovered] = useState(false);  // 悬停状态
-  const { camera } = useThree();       // 获取场景相机
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });  // 鼠标位置状态
   // 添加过渡状态
   const transitionRef = useRef({ 

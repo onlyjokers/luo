@@ -39,27 +39,26 @@ export default function App() {
   const controlsRef = useRef();
   // 新增：存储相机偏移，以在 SteadicamRig 中使用
   const offsetRef = useRef(new THREE.Vector3(0, 0, 0));
+  // 在组件开始处初始化上一次鼠标位置为屏幕中心（归一化的中间值）
+  const prevMouseRef = useRef({ x: 0, y: 0 });
 
-  // 鼠标移动相关：开始处理Canvas鼠标移动事件，更新控制器和相机偏移
-  // 处理鼠标移动事件的函数
+  // 鼠标移动相关：开始处理Canvas鼠标移动事件，更新控制器和相机偏移（连续状态）
   const handleMouseMove = (e) => {
-    if (controlsRef.current) {
-      // 将鼠标位置转换为旋转角度 
-      // clientY/innerHeight将得到0-1的值，减0.5使其范围为-0.5到0.5
-      // 乘0.5来限制旋转幅度
-      const rotX = (e.clientY / window.innerHeight - 0.5) * 0.5;
-      const rotY = (e.clientX / window.innerWidth - 0.5) * 0.5;
-      
-      // 平滑设置相机角度
-      // setAzimuthalAngle设置水平旋转角度
-      // setPolarAngle设置垂直旋转角度
-      controlsRef.current.setAzimuthalAngle(-rotY);
-      controlsRef.current.setPolarAngle(Math.PI / 2 - rotX);
-    }
-    // 将鼠标范围转化为偏移量 (x, y, z)，z 可随意调节以产生前后“摇臂”感
-    offsetRef.current.x = (e.clientX / window.innerWidth - 0.5) * 5.0;
-    offsetRef.current.y = -(e.clientY / window.innerHeight - 0.5) * 5.0;
-    offsetRef.current.z = 0.4 * Math.sin(e.clientX * 0.02);
+    // 计算归一化的鼠标位置
+    const norm = {
+      x: e.clientX / window.innerWidth - 0.5,
+      y: e.clientY / window.innerHeight - 0.5,
+    };
+    // 根据当前与上一次位置计算偏移差值
+    const diffX = norm.x - prevMouseRef.current.x;
+    const diffY = norm.y - prevMouseRef.current.y;
+    // 累加偏移，保持连续状态；根据需要调整乘数（例如5.0）来控制偏移幅度
+    offsetRef.current.x += diffX * 5.0;
+    offsetRef.current.y += -diffY * 5.0;
+    // 可选：针对 z 轴也累加一个效果
+    offsetRef.current.z += 0.4 * diffX;
+    // 更新上一次的鼠标位置
+    prevMouseRef.current = norm;
   };
   // 鼠标移动相关：结束处理Canvas鼠标移动事件，更新控制器和相机偏移
 
