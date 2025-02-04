@@ -1,6 +1,6 @@
 // 导入必要的库和hooks
 import { shaderMaterial } from '@react-three/drei';
-import { extend, useFrame, useThree } from '@react-three/fiber';
+import { extend, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useRef, useState } from 'react';
 
@@ -239,4 +239,4 @@ export default function Sphere() {
       <sphereMaterial ref={materialRef} />
     </mesh>
   );
-}
+} 

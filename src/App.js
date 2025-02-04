@@ -67,11 +67,11 @@ export default function App() {
     <Canvas
       // 设置相机初始位置
       camera={{ position: [0, 0, 4] }}
-      // 设置画布样式
+      // 修改画布样式，将背景色改为浅灰色
       style={{ 
         width: '100vw', 
         height: '100vh',
-        background: '#ffffff'
+        background: '#d3d3d3'
       }}
       onMouseMove={handleMouseMove}
     >
