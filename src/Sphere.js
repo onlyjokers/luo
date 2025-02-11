@@ -9,7 +9,6 @@ import {
   shaderUniforms,
   animationConfig,
   geometryConfig,
-  deformationConfig,
 } from './config/sphereConfig';
 
 // 创建自定义着色器材质

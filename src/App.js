@@ -1,8 +1,8 @@
 import React from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber';     // Three.js 的 React 封装
 import { OrbitControls } from '@react-three/drei';  // 相机控制组件
-import Sphere from './Sphere';  // 导入自定义球体组件
-import { useRef } from 'react';  // 用于获取 DOM 引用
+import Sphere from './Sphere'; 
+import { useRef } from 'react'; 
 import * as THREE from 'three';
 
 // 新增 SteadicamRig 组件
