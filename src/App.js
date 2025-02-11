@@ -1,9 +1,8 @@
-// 导入必要的React组件和hooks
 import React from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber';     // Three.js的React封装
+import { Canvas, useFrame, useThree } from '@react-three/fiber';     // Three.js 的 React 封装
 import { OrbitControls } from '@react-three/drei';  // 相机控制组件
-import Sphere from './Sphere2';  // 导入自定义球体组件
-import { useRef } from 'react';  // 用于获取DOM引用
+import Sphere from './Sphere';  // 导入自定义球体组件
+import { useRef } from 'react';  // 用于获取 DOM 引用
 import * as THREE from 'three';
 
 // 新增 SteadicamRig 组件
@@ -35,14 +34,14 @@ function SteadicamRig({ offsetRef }) {
 }
 
 export default function App() {
-  // 创建对OrbitControls的引用
+  // 创建对 OrbitControls 的引用
   const controlsRef = useRef();
   // 新增：存储相机偏移，以在 SteadicamRig 中使用
   const offsetRef = useRef(new THREE.Vector3(0, 0, 0));
   // 在组件开始处初始化上一次鼠标位置为屏幕中心（归一化的中间值）
   const prevMouseRef = useRef({ x: 0, y: 0 });
 
-  // 鼠标移动相关：开始处理Canvas鼠标移动事件，更新控制器和相机偏移（连续状态）
+  // 鼠标移动相关：开始处理 Canvas 鼠标移动事件，更新控制器和相机偏移（连续状态）
   const handleMouseMove = (e) => {
     // 计算归一化的鼠标位置
     const norm = {
@@ -52,7 +51,7 @@ export default function App() {
     // 根据当前与上一次位置计算偏移差值
     const diffX = norm.x - prevMouseRef.current.x;
     const diffY = norm.y - prevMouseRef.current.y;
-    // 累加偏移，保持连续状态；根据需要调整乘数（例如5.0）来控制偏移幅度
+    // 累加偏移，保持连续状态；根据需要调整乘数来控制偏移幅度
     offsetRef.current.x += diffX * 5.0;
     offsetRef.current.y += -diffY * 5.0;
     // 可选：针对 z 轴也累加一个效果
@@ -60,10 +59,10 @@ export default function App() {
     // 更新上一次的鼠标位置
     prevMouseRef.current = norm;
   };
-  // 鼠标移动相关：结束处理Canvas鼠标移动事件，更新控制器和相机偏移
+  // 鼠标移动相关：结束处理 Canvas 鼠标移动事件，更新控制器和相机偏移
 
   return (
-    // Canvas是Three.js的渲染容器
+    // Canvas 是 Three.js 的渲染容器
     <Canvas
       // 设置相机初始位置
       camera={{ position: [0, 0, 4] }}
@@ -71,7 +70,7 @@ export default function App() {
       style={{ 
         width: '100vw', 
         height: '100vh',
-        background: '#d3d3d3'
+        background: 'rgb(255, 255, 255)'
       }}
       onMouseMove={handleMouseMove}
     >
